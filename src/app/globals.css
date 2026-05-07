@@ -127,9 +127,14 @@
   html {
     @apply font-sans;
   }
-  button:not(:disabled),
-  [role="button"]:not(:disabled),
-  a {
-    cursor: pointer;
-  }
+button,
+[role="button"],
+a {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"]:disabled {
+  cursor: not-allowed;
+}
 }
