@@ -89,6 +89,21 @@ export async function analyzeTicket(ticketId) {
     }
   })
 
-revalidatePath('/app')
+  revalidatePath('/app')
   redirect(`/app/tickets/${ticketId}`)
+}
+
+export async function saveNotes(ticketId, formData) {
+  const notes = formData.get('notes')?.toString() || ''
+
+  if (notes.length > 50000) {
+    throw new Error('Notes are too long (max 50,000 characters)')
+  }
+
+  await db
+    .update(tickets)
+    .set({ notes, updatedAt: new Date() })
+    .where(eq(tickets.id, ticketId))
+
+  revalidatePath(`/app/tickets/${ticketId}`)
 }

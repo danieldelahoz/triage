@@ -12,6 +12,7 @@ import {
 import { SubmitButton } from '@/components/ui/submit-button'
 import Link from 'next/link'
 import { analyzeTicket } from './actions'
+import { NotesEditor } from './notes-editor'
 
 export default async function TicketPage({ params }) {
   const { id } = await params
@@ -144,26 +145,23 @@ export default async function TicketPage({ params }) {
         </div>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Investigation notes</CardTitle>
-              <CardDescription>
-                Your working notes on this ticket
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {ticket.notes ? (
-                <pre className="text-sm whitespace-pre-wrap break-words bg-muted/30 rounded p-4">
-                  {ticket.notes}
-                </pre>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">
-                  No notes yet. After analyzing the ticket you'll be able to add your
-                  investigation notes here.
-                </p>
-              )}
-            </CardContent>
-          </Card>
+<Card>
+  <CardHeader>
+    <CardTitle>Investigation notes</CardTitle>
+    <CardDescription>
+      Your working notes on this ticket
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    {isAnalyzed ? (
+      <NotesEditor ticketId={id} initialNotes={ticket.notes} />
+    ) : (
+      <p className="text-sm text-muted-foreground italic">
+        Analyze the ticket first to start taking notes.
+      </p>
+    )}
+  </CardContent>
+</Card>
 
           <Card>
             <CardHeader>
