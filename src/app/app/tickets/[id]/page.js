@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card'
 import { SubmitButton } from '@/components/ui/submit-button'
 import Link from 'next/link'
-import { analyzeTicket } from './actions'
+import { analyzeTicket, markResolved, reopenTicket } from './actions'
 import { NotesEditor } from './notes-editor'
 import { RootCausesList } from './root-causes-list'
 import { ResponseEditor } from './response-editor'
@@ -42,6 +42,8 @@ export default async function TicketPage({ params }) {
   const isAnalyzed = ticketRootCauses.length > 0
 
   const analyze = analyzeTicket.bind(null, id)
+  const resolve = markResolved.bind(null, id)
+  const reopen = reopenTicket.bind(null, id)
 
   return (
     <div className="p-8 max-w-6xl">
@@ -133,6 +135,34 @@ export default async function TicketPage({ params }) {
             </Card>
           )}
         </div>
+
+        {isAnalyzed && (
+  <Card className="mt-6">
+    <CardContent className="pt-6 flex items-center justify-between gap-4">
+      <div>
+        <p className="font-medium text-sm mb-1">
+          {ticket.status === 'resolved' ? 'Ticket resolved' : 'Ready to resolve?'}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {ticket.status === 'resolved'
+            ? `Resolved on ${formatDate(ticket.resolvedAt)}`
+            : 'Mark this ticket resolved when the response has been sent and the issue is addressed.'}
+        </p>
+      </div>
+      {ticket.status === 'resolved' ? (
+        <form action={reopen}>
+          <SubmitButton pendingText="Reopening…" variant="outline">
+            Reopen ticket
+          </SubmitButton>
+        </form>
+      ) : (
+        <form action={resolve}>
+          <SubmitButton pendingText="Resolving…">Mark resolved</SubmitButton>
+        </form>
+      )}
+    </CardContent>
+  </Card>
+)}
 
         <div className="space-y-6">
           <Card>

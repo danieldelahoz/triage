@@ -200,3 +200,31 @@ export async function saveResponse(ticketId, formData) {
 
   revalidatePath(`/app/tickets/${ticketId}`)
 }
+
+export async function markResolved(ticketId) {
+  await db
+    .update(tickets)
+    .set({
+      status: 'resolved',
+      resolvedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(tickets.id, ticketId))
+
+  revalidatePath(`/app/tickets/${ticketId}`)
+  revalidatePath('/app')
+}
+
+export async function reopenTicket(ticketId) {
+  await db
+    .update(tickets)
+    .set({
+      status: 'investigating',
+      resolvedAt: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(tickets.id, ticketId))
+
+  revalidatePath(`/app/tickets/${ticketId}`)
+  revalidatePath('/app')
+}
