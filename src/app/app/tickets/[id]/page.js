@@ -13,6 +13,7 @@ import { SubmitButton } from '@/components/ui/submit-button'
 import Link from 'next/link'
 import { analyzeTicket } from './actions'
 import { NotesEditor } from './notes-editor'
+import { RootCausesList } from './root-causes-list'
 
 export default async function TicketPage({ params }) {
   const { id } = await params
@@ -92,35 +93,23 @@ export default async function TicketPage({ params }) {
             </Card>
           )}
 
-          {isAnalyzed && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Likely root causes</CardTitle>
-                <CardDescription>
-                  Top hypotheses from Claude, ranked by confidence
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {ticketRootCauses
-                  .sort((a, b) => b.confidence - a.confidence)
-                  .map((rc) => (
-                    <div key={rc.id} className="border rounded-lg p-4">
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <p className="font-medium text-sm">{rc.description}</p>
-                        <span className="text-xs text-muted-foreground shrink-0">
-                          {rc.confidence}%
-                        </span>
-                      </div>
-                      {rc.reasoning && (
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {rc.reasoning}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-              </CardContent>
-            </Card>
-          )}
+{isAnalyzed && (
+  <Card>
+    <CardHeader>
+      <CardTitle>Likely root causes</CardTitle>
+      <CardDescription>
+        Click to mark which hypothesis you're chasing
+      </CardDescription>
+    </CardHeader>
+    <CardContent>
+      <RootCausesList
+        ticketId={id}
+        rootCauses={ticketRootCauses}
+        selectedRootCauseId={ticket.selectedRootCauseId}
+      />
+    </CardContent>
+  </Card>
+)}
 
           {isAnalyzed && ticketInfoGaps.length > 0 && (
             <Card>

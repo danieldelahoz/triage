@@ -106,4 +106,16 @@ export async function saveNotes(ticketId, formData) {
     .where(eq(tickets.id, ticketId))
 
   revalidatePath(`/app/tickets/${ticketId}`)
+
+}
+export async function selectRootCause(ticketId, rootCauseId) {
+  await db
+    .update(tickets)
+    .set({
+      selectedRootCauseId: rootCauseId,
+      updatedAt: new Date(),
+    })
+    .where(eq(tickets.id, ticketId))
+
+  revalidatePath(`/app/tickets/${ticketId}`)
 }
