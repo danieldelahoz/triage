@@ -9,10 +9,9 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/ui/submit-button'
 import Link from 'next/link'
 import { analyzeTicket } from './actions'
-import { SubmitButton } from '@/components/ui/submit-button'
 
 export default async function TicketPage({ params }) {
   const { id } = await params
@@ -38,37 +37,27 @@ export default async function TicketPage({ params }) {
     .where(eq(infoGaps.ticketId, id))
 
   const isAnalyzed = ticketRootCauses.length > 0
-  const isAnalyzing = ticket.status === 'analyzing'
 
   const analyze = analyzeTicket.bind(null, id)
 
   return (
     <div className="p-8 max-w-6xl">
-      <header className="mb-6 flex items-start justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-            <Link href="/app" className="hover:text-foreground transition-colors">
-              Dashboard
-            </Link>
-            <span>/</span>
-            <span>Ticket</span>
-          </div>
-          <h1 className="text-2xl font-semibold mb-1">{ticket.title}</h1>
-          <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
-            <StatusBadge status={ticket.status} />
-            {ticket.category && <Badge>{ticket.category}</Badge>}
-            {ticket.severity && <SeverityBadge severity={ticket.severity} />}
-            {ticket.priority && <Badge>{`priority: ${ticket.priority}`}</Badge>}
-            {ticket.customerName && <Badge>{ticket.customerName}</Badge>}
-            {ticket.productArea && <Badge>{ticket.productArea}</Badge>}
-          </div>
+      <header className="mb-6">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+          <Link href="/app" className="hover:text-foreground transition-colors">
+            Dashboard
+          </Link>
+          <span>/</span>
+          <span>Ticket</span>
         </div>
-        <div className="flex gap-2 shrink-0">
-          {!isAnalyzed && (
-<form action={analyze}>
-  <SubmitButton pendingText="Analyzing…">Analyze</SubmitButton>
-</form>
-          )}
+        <h1 className="text-2xl font-semibold mb-1">{ticket.title}</h1>
+        <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+          <StatusBadge status={ticket.status} />
+          {ticket.category && <Badge>{ticket.category}</Badge>}
+          {ticket.severity && <SeverityBadge severity={ticket.severity} />}
+          {ticket.priority && <Badge>{`priority: ${ticket.priority}`}</Badge>}
+          {ticket.customerName && <Badge>{ticket.customerName}</Badge>}
+          {ticket.productArea && <Badge>{ticket.productArea}</Badge>}
         </div>
       </header>
 
@@ -95,9 +84,9 @@ export default async function TicketPage({ params }) {
                   This ticket hasn't been analyzed yet. Click Analyze to send it to Claude
                   for categorization, root cause hypotheses, and similarity matching.
                 </p>
-<form action={analyze}>
-  <SubmitButton pendingText="Analyzing…">Analyze ticket</SubmitButton>
-</form>
+                <form action={analyze}>
+                  <SubmitButton pendingText="Analyzing…">Analyze ticket</SubmitButton>
+                </form>
               </CardContent>
             </Card>
           )}
