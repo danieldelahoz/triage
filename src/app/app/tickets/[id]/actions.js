@@ -4,6 +4,7 @@ import { db } from '@/db'
 import { tickets, rootCauses, infoGaps } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { anthropic, MODELS, TOKEN_LIMITS } from '@/lib/anthropic'
 import { buildAnalysisPrompt } from '@/lib/prompts'
 import { analysisSchema } from '@/lib/schemas'
@@ -88,6 +89,6 @@ export async function analyzeTicket(ticketId) {
     }
   })
 
-  revalidatePath(`/app/tickets/${ticketId}`)
-  revalidatePath('/app')
+revalidatePath('/app')
+  redirect(`/app/tickets/${ticketId}`)
 }
