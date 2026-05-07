@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { analyzeTicket } from './actions'
+import { SubmitButton } from '@/components/ui/submit-button'
 
 export default async function TicketPage({ params }) {
   const { id } = await params
@@ -64,11 +65,9 @@ export default async function TicketPage({ params }) {
         </div>
         <div className="flex gap-2 shrink-0">
           {!isAnalyzed && (
-            <form action={analyze}>
-              <Button type="submit" disabled={isAnalyzing}>
-                {isAnalyzing ? 'Analyzing…' : 'Analyze'}
-              </Button>
-            </form>
+<form action={analyze}>
+  <SubmitButton pendingText="Analyzing…">Analyze</SubmitButton>
+</form>
           )}
         </div>
       </header>
@@ -96,11 +95,9 @@ export default async function TicketPage({ params }) {
                   This ticket hasn't been analyzed yet. Click Analyze to send it to Claude
                   for categorization, root cause hypotheses, and similarity matching.
                 </p>
-                <form action={analyze}>
-                  <Button type="submit" disabled={isAnalyzing}>
-                    {isAnalyzing ? 'Analyzing…' : 'Analyze ticket'}
-                  </Button>
-                </form>
+<form action={analyze}>
+  <SubmitButton pendingText="Analyzing…">Analyze ticket</SubmitButton>
+</form>
               </CardContent>
             </Card>
           )}
