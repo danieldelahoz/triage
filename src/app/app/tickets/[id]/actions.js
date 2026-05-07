@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { anthropic, MODELS, TOKEN_LIMITS } from '@/lib/anthropic'
-import { buildAnalysisPrompt } from '@/lib/prompts'
+import { buildAnalysisPrompt, buildResponsePrompt } from '@/lib/prompts'
 import { analysisSchema } from '@/lib/schemas'
 
 export async function analyzeTicket(ticketId) {
@@ -106,8 +106,8 @@ export async function saveNotes(ticketId, formData) {
     .where(eq(tickets.id, ticketId))
 
   revalidatePath(`/app/tickets/${ticketId}`)
-
 }
+
 export async function selectRootCause(ticketId, rootCauseId) {
   await db
     .update(tickets)
@@ -115,6 +115,87 @@ export async function selectRootCause(ticketId, rootCauseId) {
       selectedRootCauseId: rootCauseId,
       updatedAt: new Date(),
     })
+    .where(eq(tickets.id, ticketId))
+
+  revalidatePath(`/app/tickets/${ticketId}`)
+}
+
+export async function generateResponse(ticketId) {
+  const [ticket] = await db
+    .select()
+    .from(tickets)
+    .where(eq(tickets.id, ticketId))
+    .limit(1)
+
+  if (!ticket) {
+    throw new Error('Ticket not found')
+  }
+
+  if (!ticket.selectedRootCauseId) {
+    throw new Error('Select a root cause before generating a response')
+  }
+
+  const [selectedRC] = await db
+    .select()
+    .from(rootCauses)
+    .where(eq(rootCauses.id, ticket.selectedRootCauseId))
+    .limit(1)
+
+  if (!selectedRC) {
+    throw new Error('Selected root cause not found')
+  }
+
+  const { systemPrompt, userPrompt } = buildResponsePrompt(
+    ticket,
+    ticket.notes,
+    selectedRC
+  )
+
+  let draft
+  try {
+    const response = await anthropic.messages.create({
+      model: MODELS.drafting,
+      max_tokens: TOKEN_LIMITS.draftOutput,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+    })
+
+    draft = response.content
+      .filter((block) => block.type === 'text')
+      .map((block) => block.text)
+      .join('')
+      .trim()
+
+    if (!draft) {
+      throw new Error('Empty response from Claude')
+    }
+  } catch (err) {
+    throw new Error(`Response generation failed: ${err.message}`)
+  }
+
+  await db
+    .update(tickets)
+    .set({
+      finalResponse: draft,
+      status: 'ready',
+      updatedAt: new Date(),
+    })
+    .where(eq(tickets.id, ticketId))
+
+  revalidatePath(`/app/tickets/${ticketId}`)
+  return draft
+}
+
+export async function saveResponse(ticketId, formData) {
+  const response = formData.get('response')?.toString() || ''
+
+  if (response.length > 50000) {
+    throw new Error('Response is too long (max 50,000 characters)')
+  }
+
+  await db
+    .update(tickets)
+    .set({ finalResponse: response, updatedAt: new Date() })
     .where(eq(tickets.id, ticketId))
 
   revalidatePath(`/app/tickets/${ticketId}`)

@@ -52,3 +52,49 @@ Your output is consumed programmatically. Always return valid JSON matching the 
 
   return { systemPrompt, userPrompt }
 }
+
+export function buildResponsePrompt(ticket, notes, selectedRootCause) {
+  const customerContext = ticket.customerName
+    ? `\nCustomer: ${ticket.customerName}`
+    : ''
+  const productContext = ticket.productArea
+    ? `\nProduct area: ${ticket.productArea}`
+    : ''
+  const notesSection = notes
+    ? `\n\n# Investigation notes\n${notes}`
+    : '\n\n# Investigation notes\n(no notes provided)'
+
+  const userPrompt = `Draft a customer-facing response to this support ticket.
+
+# Ticket
+Title: ${ticket.title}${customerContext}${productContext}
+
+Original ticket:
+${ticket.description}${notesSection}
+
+# Confirmed root cause
+${selectedRootCause.description}
+
+Reasoning: ${selectedRootCause.reasoning}
+
+# Output format
+Return ONLY the response text. No preamble, no commentary, no JSON, no markdown headers.
+
+The response should:
+- Address the customer directly
+- Acknowledge the issue and confirm the root cause
+- Explain what happened in plain language (no internal jargon)
+- State next steps clearly
+- Be concise — under 250 words unless the situation genuinely requires more
+- Match a professional, warm, confident tone
+
+The human will edit this draft before sending. Don't be overly cautious or hedge unnecessarily. Be specific and helpful.`
+
+  const systemPrompt = `You are a senior Technical Support Engineer drafting customer-facing responses. Your drafts are reviewed and edited by another engineer before being sent.
+
+Write in clear, direct prose. Match the customer's level of technical sophistication based on the ticket. Avoid corporate fluff ("we understand your frustration", "thank you for reaching out"). Get to the point.
+
+Return only the response text — no JSON, no markdown structure, no quotation marks around the response.`
+
+  return { systemPrompt, userPrompt }
+}

@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { analyzeTicket } from './actions'
 import { NotesEditor } from './notes-editor'
 import { RootCausesList } from './root-causes-list'
+import { ResponseEditor } from './response-editor'
 
 export default async function TicketPage({ params }) {
   const { id } = await params
@@ -93,23 +94,23 @@ export default async function TicketPage({ params }) {
             </Card>
           )}
 
-{isAnalyzed && (
-  <Card>
-    <CardHeader>
-      <CardTitle>Likely root causes</CardTitle>
-      <CardDescription>
-        Click to mark which hypothesis you're chasing
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      <RootCausesList
-        ticketId={id}
-        rootCauses={ticketRootCauses}
-        selectedRootCauseId={ticket.selectedRootCauseId}
-      />
-    </CardContent>
-  </Card>
-)}
+          {isAnalyzed && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Likely root causes</CardTitle>
+                <CardDescription>
+                  Click to mark which hypothesis you're chasing
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RootCausesList
+                  ticketId={id}
+                  rootCauses={ticketRootCauses}
+                  selectedRootCauseId={ticket.selectedRootCauseId}
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {isAnalyzed && ticketInfoGaps.length > 0 && (
             <Card>
@@ -134,23 +135,23 @@ export default async function TicketPage({ params }) {
         </div>
 
         <div className="space-y-6">
-<Card>
-  <CardHeader>
-    <CardTitle>Investigation notes</CardTitle>
-    <CardDescription>
-      Your working notes on this ticket
-    </CardDescription>
-  </CardHeader>
-  <CardContent>
-    {isAnalyzed ? (
-      <NotesEditor ticketId={id} initialNotes={ticket.notes} />
-    ) : (
-      <p className="text-sm text-muted-foreground italic">
-        Analyze the ticket first to start taking notes.
-      </p>
-    )}
-  </CardContent>
-</Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Investigation notes</CardTitle>
+              <CardDescription>
+                Your working notes on this ticket
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isAnalyzed ? (
+                <NotesEditor ticketId={id} initialNotes={ticket.notes} />
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  Analyze the ticket first to start taking notes.
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader>
@@ -160,14 +161,15 @@ export default async function TicketPage({ params }) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {ticket.finalResponse ? (
-                <pre className="text-sm whitespace-pre-wrap break-words bg-muted/30 rounded p-4">
-                  {ticket.finalResponse}
-                </pre>
+              {isAnalyzed ? (
+                <ResponseEditor
+                  ticketId={id}
+                  initialResponse={ticket.finalResponse}
+                  hasSelectedRootCause={Boolean(ticket.selectedRootCauseId)}
+                />
               ) : (
                 <p className="text-sm text-muted-foreground italic">
-                  No draft yet. Once you've picked a root cause, you'll be able to
-                  generate a response draft.
+                  Analyze the ticket first to generate a response.
                 </p>
               )}
             </CardContent>
